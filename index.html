@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Capricornus Constellation - Final Version</title>
+    <title>Capricornus Constellation - Double Music</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
@@ -40,6 +40,15 @@
     </style>
 </head>
 <body>
+
+    <audio id="bgMusic1" loop>
+        <source src="snapvideo--Funny Viral Music for TikToks, Reels, and Shorts _ Nintendo Wii Mii Theme 😂🎮 The iconic Nintendo Wii Mii Channel Theme is back and going viral for all the right reasons. This quirky, nostalgic tune is the perfect funny soundtrack for .mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="bgMusic2" loop>
+        <source src="nhac2.mp3" type="audio/mpeg">
+    </audio>
+
     <canvas id="galaxy"></canvas>
     <button id="continueBtn">Tiếp tục hành trình</button>
 
@@ -47,11 +56,15 @@
         const canvas = document.getElementById("galaxy");
         const ctx = canvas.getContext("2d");
         const btn = document.getElementById("continueBtn");
+        
+                const music1 = document.getElementById("bgMusic1");
+        const music2 = document.getElementById("bgMusic2");
 
         let width, height, stars = [], asteroids = [], constellationStars = [];
         let spaceship = { x: 0, y: 0, state: "orbit", hoverAngle: 0 };
         let currentIdx = 0;
         let showConstellation = false, showMessage = false, msgAlpha = 0, constelAlpha = 0;
+        let music2Started = false; // Biến kiểm soát để nhạc 2 chỉ chạy 1 lần khi bắt đầu
         
         const spaceshipImg = new Image();
         spaceshipImg.src = "https://cdn-icons-png.flaticon.com/512/2026/2026462.png"; 
@@ -63,23 +76,21 @@
             { px: 0.8, py: 0.85, pr: 0.07, color: "#fbbf24" }
         ];
 
-        // Cấu hình 9 điểm theo đúng sơ đồ ảnh (1)
         const capricornConfig = [
-            { id: 0, px: 0.15, py: 0.25, r: 6 }, // 1. Sao trên cùng bên trái
-            { id: 1, px: 0.22, py: 0.30, r: 4 }, // 2. Sao cạnh trái (đường ngang trên)
-            { id: 2, px: 0.35, py: 0.33, r: 4 }, // 3. Sao giữa (đường ngang trên)
-            { id: 3, px: 0.48, py: 0.35, r: 4 }, // 4. Sao phải (đường ngang trên)
-            { id: 4, px: 0.78, py: 0.28, r: 5 }, // 5. Sao góc trên bên phải
-            { id: 5, px: 0.83, py: 0.15, r: 7 }, // 6. Sao sừng trên cùng bên phải
-            { id: 6, px: 0.65, py: 0.75, r: 4 }, // 7. Sao cạnh dưới bên phải
-            { id: 7, px: 0.55, py: 0.85, r: 6 }, // 8. Sao đáy dưới cùng
-            { id: 8, px: 0.30, py: 0.58, r: 4 }  // 9. Sao cạnh dưới bên trái
+            { id: 0, px: 0.15, py: 0.25, r: 6 }, 
+            { id: 1, px: 0.22, py: 0.30, r: 4 }, 
+            { id: 2, px: 0.35, py: 0.33, r: 4 }, 
+            { id: 3, px: 0.48, py: 0.35, r: 4 }, 
+            { id: 4, px: 0.78, py: 0.28, r: 5 }, 
+            { id: 5, px: 0.83, py: 0.15, r: 7 }, 
+            { id: 6, px: 0.65, py: 0.75, r: 4 }, 
+            { id: 7, px: 0.55, py: 0.85, r: 6 }, 
+            { id: 8, px: 0.30, py: 0.58, r: 4 }  
         ];
 
         function init() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            
             stars = Array.from({ length: 400 }, () => ({
                 x: Math.random() * width,
                 y: Math.random() * height,
@@ -87,7 +98,6 @@
                 alpha: Math.random(),
                 speed: 0.005 + Math.random() * 0.01
             }));
-
             const minSide = Math.min(width, height);
             asteroids = asteroidConfig.map(conf => ({
                 x: conf.px * width,
@@ -95,7 +105,6 @@
                 r: conf.pr * minSide,
                 color: conf.color
             }));
-
             constellationStars = capricornConfig.map(p => ({
                 x: p.px * width,
                 y: p.py * height,
@@ -114,41 +123,28 @@
         function drawConstellation() {
             if (!showConstellation) return;
             if (constelAlpha < 1) constelAlpha += 0.01;
-            
             ctx.save();
             ctx.globalAlpha = constelAlpha;
             ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
             ctx.lineWidth = 2.5;
             ctx.shadowBlur = 15;
             ctx.shadowColor = "white";
-
             const s = constellationStars;
-
             ctx.beginPath();
-            // Nối dây theo hình (1)
-            // Đường ngang phía trên
             ctx.moveTo(s[0].x, s[0].y);
             ctx.lineTo(s[1].x, s[1].y);
             ctx.lineTo(s[2].x, s[2].y);
             ctx.lineTo(s[3].x, s[3].y);
             ctx.lineTo(s[4].x, s[4].y);
-            
-            // Đường sừng phải
             ctx.lineTo(s[5].x, s[5].y);
-            
-            // Đường vòng xuống dưới
             ctx.moveTo(s[4].x, s[4].y);
             ctx.lineTo(s[6].x, s[6].y);
             ctx.lineTo(s[7].x, s[7].y);
             ctx.lineTo(s[8].x, s[8].y);
-            ctx.lineTo(s[0].x, s[0].y); // Khép kín về điểm đầu bên trái
-            
+            ctx.lineTo(s[0].x, s[0].y);
             ctx.stroke();
-
-            // Vẽ 9 ngôi sao
             s.forEach((star, index) => {
                 ctx.fillStyle = "white";
-                // Làm cho ngôi sao ở sừng và đáy to/sáng hơn một chút
                 ctx.shadowBlur = (index === 0 || index === 5 || index === 7) ? 25 : 10;
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
@@ -159,11 +155,11 @@
 
         function updateSpaceship() {
             let target = currentIdx < asteroids.length ? asteroids[currentIdx] : { x: width/2, y: height/2 };
-
+            
             if (spaceship.state === "orbit" || spaceship.state === "moving") {
                 spaceship.x += (target.x - spaceship.x) * 0.05;
                 spaceship.y += (target.y - spaceship.y) * 0.05;
-
+                
                 if (Math.abs(spaceship.x - target.x) < 1 && Math.abs(spaceship.y - target.y) < 1) {
                     if (currentIdx < asteroids.length) {
                         spaceship.state = "landed";
@@ -171,6 +167,14 @@
                     } else {
                         spaceship.state = "final";
                         showConstellation = true;
+                                                
+                        if (!music2Started) {
+                            music1.pause(); // Dừng nhạc 1
+                            music2.currentTime = 0; // Reset nhạc 2 về đầu
+                            music2.play().catch(e => console.log(e)); // Phát nhạc 2
+                            music2Started = true;
+                        }
+                        
                         setTimeout(() => showMessage = true, 800);
                     }
                 }
@@ -178,7 +182,6 @@
                 spaceship.hoverAngle += 0.05;
                 spaceship.y = height/2 + Math.sin(spaceship.hoverAngle) * 10;
             }
-
             if (spaceshipImg.complete) {
                 const s = width < 600 ? 50 : 70;
                 ctx.drawImage(spaceshipImg, spaceship.x - s/2, spaceship.y - s/2, s, s);
@@ -193,19 +196,17 @@
             const boxW = Math.min(width * 0.85, 380);
             const boxX = (width - boxW) / 2;
             const boxY = 80;
-
             ctx.fillStyle = "rgba(0,0,0,0.85)";
             ctx.strokeStyle = "#4ade80";
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.roundRect(boxX, boxY, boxW, 130, 20); ctx.fill(); ctx.stroke();
-            
             ctx.fillStyle = "#4ade80";
             ctx.textAlign = "center";
             ctx.font = "bold 20px Arial";
             ctx.fillText("✦ NGUYỄN NGỌC THẢO NGUYÊN ✦", width/2, boxY + 50);
             ctx.fillStyle = "white";
             ctx.font = "18px Arial";
-            ctx.fillText("Chúc iem sinh nhật dui dẻeeeeeeeeeeee!", width/2, boxY + 90);
+            ctx.fillText("CHÚC MỪNG SINH NHẬT IEMMMMMMMM", width/2, boxY + 90);
             ctx.restore();
         }
 
@@ -236,7 +237,13 @@
         }
 
         window.addEventListener("resize", init);
+        
         btn.addEventListener("click", () => {
+            // Khi nhấn nút đầu tiên, phát nhạc 1
+            if (currentIdx === 0 && music1.paused) {
+                music1.play().catch(e => console.log(e));
+            }
+
             btn.style.display = "none";
             currentIdx++;
             spaceship.state = "moving";
